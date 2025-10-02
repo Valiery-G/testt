@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slider Klien</title>
+  <style>
+    /* --- Section Clients --- */
+    .clients {
+      padding: 80px 50px;
+      background: #ffffff;
+      color: #2862c0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .clients .container {
+      max-width: 1100px;
+      margin: auto;
+      position: relative;
+    }
+
+    .clients h2 {
+      text-align: center;
+      font-size: 30px;
+      color: #000;
+      margin-bottom: 30px;
+    }
+
+    .clients-slider {
+      display: flex;
+      gap: 30px;
+      overflow: hidden;
+      scroll-behavior: smooth;
+    }
+
+    .client-card {
+      flex: 0 0 auto;
+      width: 150px;
+      background: #fff;
+      border-radius: 20px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .client-card img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      border-radius: 15px;
+      margin-bottom: 10px;
+    }
+
+    .client-card p {
+      font-size: 14px;
+      color: #003366;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .client-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    /* --- Tombol --- */
+    .clients-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #2862c0;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 20px;
+      border-radius: 50%;
+      transition: background 0.3s;
+      z-index: 2;
+    }
+
+    .clients-btn:hover {
+      background: #003366;
+    }
+
+    .clients-btn.prev {
+      left: -10px;
+    }
+
+    .clients-btn.next {
+      right: -10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Section Clients -->
+  <section class="clients">
+    <div class="container">
+      <h2>KLIEN KAMI</h2>
+
+      <button class="clients-btn prev" type="button">‹</button>
+      <button class="clients-btn next" type="button">›</button>
+
+      <div class="clients-slider" id="clientsSlider">
+        <div class="client-card"><img src="https://via.placeholder.com/80"><p>Client 1</p></div>
+        <div class="client-card"><img src="https://via.placeholder.com/80"><p>Client 2</p></div>
+        <div class="client-card"><img src="https://via.placeholder.com/80"><p>Client 3</p></div>
+        <div class="client-card"><img src="https://via.placeholder.com/80"><p>Client 4</p></div>
+        <div class="client-card"><img src="https://via.placeholder.com/80"><p>Client 5</p></div>
+        <div class="client-card"><img src="https://via.placeholder.com/80"><p>Client 6</p></div>
+        <div class="client-card"><img src="https://via.placeholder.com/80"><p>Client 7</p></div>
+        <div class="client-card"><img src="https://via.placeholder.com/80"><p>Client 8</p></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const slider = document.getElementById('clientsSlider');
+    const nextBtn = document.querySelector('.clients-btn.next');
+    const prevBtn = document.querySelector('.clients-btn.prev');
+    const cardWidth = slider.querySelector('.client-card').offsetWidth + 30; // 30 = gap
+
+    // --- Auto Scroll Loop ---
+    function autoScroll() {
+      slider.scrollLeft += 1;
+      if (slider.scrollLeft >= slider.scrollWidth - slider.clientWidth) {
+        slider.scrollLeft = 0;
+      }
+    }
+
+    let scrollInterval = setInterval(autoScroll, 20);
+
+    // --- Manual Scroll ---
+    nextBtn.addEventListener('click', () => {
+      slider.scrollLeft += cardWidth;
+    });
+
+    prevBtn.addEventListener('click', () => {
+      slider.scrollLeft -= cardWidth;
+    });
+
+    // --- Pause saat hover ---
+    slider.addEventListener('mouseenter', () => clearInterval(scrollInterval));
+    slider.addEventListener('mouseleave', () => scrollInterval = setInterval(autoScroll, 20));
+  </script>
+
+</body>
+</html>
