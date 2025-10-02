@@ -97,88 +97,88 @@
 <script>
 (function () {
   const slider = document.getElementById('clientsSlider');
-  if (!slider) return console.warn('Slider element not found');
+  if (!slider) return;
 
-  // gandakan konten untuk looping halus (lakukan sekali)
+  // Gandakan isi slider untuk loop mulus
   if (!slider.dataset.duplicated) {
     slider.innerHTML += slider.innerHTML;
     slider.dataset.duplicated = '1';
   }
 
-  // helper: hitung langkah scroll (jarak antara kartu 0 dan 1)
+  const cards = slider.querySelectorAll('.client-card');
+  if (cards.length === 0) return;
+
+  // Hitung panjang set pertama secara akurat
+  const originalSetLength = (() => {
+    const first = cards[0];
+    const secondSetFirst = cards[Math.floor(cards.length / 2)];
+    return secondSetFirst.offsetLeft - first.offsetLeft;
+  })();
+
+  // Hitung step satu kartu
   function computeStep() {
-    const children = slider.querySelectorAll('.client-card');
-    if (children.length >= 2) {
-      const a = children[0].getBoundingClientRect();
-      const b = children[1].getBoundingClientRect();
-      const step = Math.round(Math.abs(b.left - a.left));
-      // fallback
-      return step > 0 ? step : (children[0].offsetWidth || 150) + 20;
+    if (cards.length >= 2) {
+      const a = cards[0].getBoundingClientRect();
+      const b = cards[1].getBoundingClientRect();
+      const step = Math.round(b.left - a.left);
+      return step > 0 ? step : cards[0].offsetWidth;
     }
     return 170;
   }
 
   let step = computeStep();
-  // recalc step on resize (layout may change)
   window.addEventListener('resize', () => { step = computeStep(); });
 
-  // auto-scroll (setInterval)
+  // --- Auto Scroll ---
   let intervalId = null;
-  const AUTO_PX_PER_TICK = 1;
-  const AUTO_TICK_MS = 20;
+  const AUTO_SPEED = 1; // px per tick
+  const AUTO_INTERVAL = 20; // ms
+
   function startAuto() {
     if (intervalId) return;
     intervalId = setInterval(() => {
-      slider.scrollLeft += AUTO_PX_PER_TICK;
-      // reset saat melewati setengah (karena kita gandakan isi)
-      if (slider.scrollLeft >= slider.scrollWidth / 2) {
+      slider.scrollLeft += AUTO_SPEED;
+
+      // Reset jika sudah lewat panjang set pertama
+      if (slider.scrollLeft >= originalSetLength) {
         slider.scrollLeft = 0;
       }
-    }, AUTO_TICK_MS);
+    }, AUTO_INTERVAL);
   }
+
   function stopAuto() {
     if (!intervalId) return;
     clearInterval(intervalId);
     intervalId = null;
   }
 
-  // Pause on pointer enter (mouse/touch)
-  slider.addEventListener('mouseenter', stopAuto);
-  slider.addEventListener('mouseleave', startAuto);
-  slider.addEventListener('touchstart', stopAuto, {passive:true});
-  slider.addEventListener('touchend', () => { setTimeout(startAuto, 600); }, {passive:true});
-
   startAuto();
 
-  // Event delegation untuk tombol: ini lebih tahan terhadap DOM/CSS kompleks
-  document.addEventListener('click', (ev) => {
-    const btn = ev.target.closest('.clients-btn');
-    if (!btn) return;
-    ev.preventDefault();
-    // jika tombol tumpang tindih slider, pastikan klik tidak dianggap hover di slider
+  // --- Manual Scroll ---
+  const nextBtn = document.querySelector('.clients-btn.next');
+  const prevBtn = document.querySelector('.clients-btn.prev');
+
+  nextBtn.addEventListener('click', () => {
     stopAuto();
-    // recompute step just-in-case
-    step = computeStep();
-
-    if (btn.classList.contains('next')) {
-      slider.scrollLeft += step;
-    } else if (btn.classList.contains('prev')) {
-      slider.scrollLeft -= step;
-    } else {
-      // fallback jika ada tombol lain
-      return;
+    slider.scrollLeft += step;
+    if (slider.scrollLeft >= originalSetLength) {
+      slider.scrollLeft = 0;
     }
-
-    // restart auto after 700ms (so user can see manual scroll)
-    setTimeout(startAuto, 700);
-
-    // debug: log jika perlu (buang komentar jika ingin lihat)
-    // console.log('manual click', btn.className, 'scrollLeft now', slider.scrollLeft);
+    setTimeout(startAuto, 600);
   });
 
-  // tambahan debugging kecil: jika tombol terlihat namun klik tidak terdeteksi,
-  // buka console dan jalankan: document.body.addEventListener('click',e=>console.log('body click',e.target));
-  // kalau body click tayang tapi tombol tidak, berarti pointer-events tertimpa css.
+  prevBtn.addEventListener('click', () => {
+    stopAuto();
+    slider.scrollLeft -= step;
+    if (slider.scrollLeft < 0) {
+      slider.scrollLeft = originalSetLength - step;
+    }
+    setTimeout(startAuto, 600);
+  });
+
+  // Pause auto saat hover
+  slider.addEventListener('mouseenter', stopAuto);
+  slider.addEventListener('mouseleave', startAuto);
 })();
 </script>
 
